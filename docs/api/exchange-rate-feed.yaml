@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: Currency Feed 1.0
+  description: Public API for currencies to be used with ACZ landing page.
+  version: 1.0.0
+servers:
+  - url: https://devsrv-01
+paths:
+  /api/v1/currency-pairs:
+    get:
+      responses:
+        '200':
+          description: List of all currency pairs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: '#/components/schemas/CurrencyPair'
+  /api/v1/currency-pairs/{primaryCcy}/{secondaryCcy}:
+    get:
+      parameters:
+        - in: path
+          name: primaryCcy
+          schema:
+            type: string
+          required: true
+          description: National code as specified in ISO 3166-1 alpha-2
+        - in: path
+          name: secondaryCcy
+          schema:
+            type: string
+          required: true
+          description: National code as specified in ISO 3166-1 alpha-2
+      responses:
+        '200':
+          description: Desired currency pair
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyPair'
+        '404':
+          description: Returned when currency pair does not exist
+  /api/v1/currency-pairs/{primaryCcy}/{secondaryCcy}/values:
+    get:
+      parameters:
+        - in: path
+          name: primaryCcy
+          schema:
+            type: string
+          required: true
+          description: National code as specified in ISO 3166-1 alpha-2
+          example: CZK
+        - in: path
+          name: secondaryCcy
+          schema:
+            type: string
+          required: true
+          description: National code as specified in ISO 3166-1 alpha-2
+          example: EUR
+        - in: query
+          name: period
+          description: Specifies period for which exchange rates will be loaded (1D - for last day, 1W - for last week, ...)
+          schema:
+            type: string
+            enum: [1D, 1W, 1M, 1Y]
+            example: 1D
+      responses:
+        '200':
+          description: Returns list of exchange rate values for selected currency pair
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    bid:
+                      type: number
+                    ask:
+                      type: number
+        '400':
+          description: Returns error with specified code and description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    CurrencyPair:
+      type: object
+      properties:
+        id:
+          type: number
+        primaryCcy:
+          type: string
+        secondaryCcy:
+          type: string
+        primaryCcyAmount:
+          type: integer
+          description: How many units of primary ccy are part of exchange (1CZK-100HUF)
+        secondaryCcyAmount:
+          type: integer
+          description: How many units of secondary ccy are part of exchange (1CZK-100HUF)
+        lastExchangeRateAskValue:
+          type: number
+        lastExchangeRateBidValue:
+          type: number
+        lastExchangeRateDate:
+          type: string
+          example: 2022-07-18T00:00:00+01:00
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+        description:
+          type: string

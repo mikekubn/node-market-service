@@ -1,0 +1,19 @@
+GET {{host}}/api/v1/meta/DE
+
+> {%
+client.test("Successfully received metadata", () => {
+    client.assert(!response.body['currencies'], "Respons does not contain currencies");
+})
+%}
+###
+POST {{host}}/api/v1/leads/de
+Content-Type: application/json
+
+{
+  "businessName": "Akcenta",
+  "personName": "Ondrej Holman",
+  "email": "ondrej.holman@akcenta.eu",
+  "phone": "+420724446619",
+  "consent": true,
+  "currencies": []
+}
